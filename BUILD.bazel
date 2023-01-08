@@ -29,6 +29,14 @@ clang_tidy_apply_fixes(
 
 cc_library(
     name = "constrained_value",
+    srcs = [
+        "src/adaptor.hpp",
+        "src/assert_predicate.hpp",
+        "src/constant.hpp",
+        "src/detail/type_name.hpp",
+        "src/predicate.hpp",
+        "src/source_location.hpp",
+    ],
     hdrs = ["constrained_value.hpp"],
     include_prefix = "constrained_value",
     visibility = ["//visibility:public"],
