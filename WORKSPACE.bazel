@@ -1,0 +1,98 @@
+workspace(name = "constrained_value")
+
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+BAZEL_TOOLCHAIN_COMMIT = "295952280d14598c54df0028fb69ac77b2d35b08"
+
+BAZEL_TOOLCHAIN_SHA = "8d0215b46ff071cc753c66475b465bee6bc19989c37b5ad86077aec60a1f5dad"
+
+BAZEL_CLANG_FORMAT_COMMIT = "cf230045617dc16ac550e3ba83521b1a7450d5fa"
+
+BAZEL_CLANG_FORMAT_SHA = "4c687a2e04923af5fc9db6d3f8d2b9610288d08dc08d64d1a95d3da8019af0ed"
+
+BAZEL_CLANG_TIDY_COMMIT = "8121a7bd2f31122da55edf06fcfbf5605017e0ec"
+
+BAZEL_CLANG_TIDY_SHA = "758295e3e386af2918c9ef906a39c2ad8f1a7c82dea7371938ab3c0e1d22e3cb"
+
+BOOST_UT_COMMIT = "7c667d99716eb25db3fabb0d9114c8ad46ad7464"
+
+BOOST_UT_SHA = "5f29c31bcbdb1083525ff536b1c09f211754424108fd6bf78a5412c3463eb98d"
+
+http_archive(
+    name = "com_grail_bazel_toolchain",
+    sha256 = BAZEL_TOOLCHAIN_SHA,
+    strip_prefix = "bazel-toolchain-{commit}".format(
+        commit = BAZEL_TOOLCHAIN_COMMIT,
+    ),
+    url = "https://github.com/oliverlee/bazel-toolchain/archive/{commit}.tar.gz".format(
+        commit = BAZEL_TOOLCHAIN_COMMIT,
+    ),
+)
+
+http_archive(
+    name = "bazel_clang_format",
+    sha256 = BAZEL_CLANG_FORMAT_SHA,
+    strip_prefix = "bazel_clang_format-{commit}".format(
+        commit = BAZEL_CLANG_FORMAT_COMMIT,
+    ),
+    url = "https://github.com/oliverlee/bazel_clang_format/archive/{commit}.tar.gz".format(
+        commit = BAZEL_CLANG_FORMAT_COMMIT,
+    ),
+)
+
+http_archive(
+    name = "bazel_clang_tidy",
+    sha256 = BAZEL_CLANG_TIDY_SHA,
+    strip_prefix = "bazel_clang_tidy-{commit}".format(
+        commit = BAZEL_CLANG_TIDY_COMMIT,
+    ),
+    url = "https://github.com/oliverlee/bazel_clang_tidy/archive/{commit}.tar.gz".format(
+        commit = BAZEL_CLANG_TIDY_COMMIT,
+    ),
+)
+
+http_archive(
+    name = "boost_ut",
+    build_file_content = """
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+cc_library(
+    name = "boost_ut",
+    hdrs = ["include/boost/ut.hpp"],
+    includes = ["include"],
+    visibility = ["//visibility:public"],
+)
+""",
+    sha256 = BOOST_UT_SHA,
+    strip_prefix = "ut-{commit}".format(
+        commit = BOOST_UT_COMMIT,
+    ),
+    url = "https://github.com/boost-ext/ut/archive/{commit}.tar.gz".format(
+        commit = BOOST_UT_COMMIT,
+    ),
+)
+
+load("@com_grail_bazel_toolchain//toolchain:deps.bzl", "bazel_toolchain_dependencies")
+load("@com_grail_bazel_toolchain//toolchain:rules.bzl", "llvm_toolchain")
+
+bazel_toolchain_dependencies()
+
+llvm_toolchain(
+    name = "llvm_toolchain",
+    cxx_flags = {"": [
+        "-std=c++20",
+        "-stdlib=libc++",
+        "-fdiagnostics-color=always",
+        "-Werror",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Wconversion",
+    ]},
+    cxx_standard = {"": "c++20"},
+    llvm_version = "15.0.6",
+)
+
+load("@llvm_toolchain//:toolchains.bzl", "llvm_register_toolchains")
+
+llvm_register_toolchains()

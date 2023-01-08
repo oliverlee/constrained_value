@@ -1,0 +1,35 @@
+load("@bazel_clang_format//:defs.bzl", "clang_format_update")
+load("@bazel_clang_tidy//:defs.bzl", "clang_tidy_apply_fixes")
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+filegroup(
+    name = "format_config",
+    srcs = [".clang-format"],
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "tidy_config",
+    srcs = [".clang-tidy"],
+    visibility = ["//visibility:public"],
+)
+
+clang_format_update(
+    name = "clang-format",
+    binary = "@llvm_toolchain//:clang-format",
+    config = ":format_config",
+)
+
+clang_tidy_apply_fixes(
+    name = "clang-tidy-apply-fixes",
+    apply_replacements_binary = "@llvm_toolchain//:clang-apply-replacements",
+    tidy_binary = "@llvm_toolchain//:clang-tidy",
+    tidy_config = ":tidy_config",
+)
+
+cc_library(
+    name = "constrained_value",
+    hdrs = ["constrained_value.hpp"],
+    include_prefix = "constrained_value",
+    visibility = ["//visibility:public"],
+)

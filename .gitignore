@@ -1,0 +1,4 @@
+# bazel symlinks
+/bazel-*
+
+user.bazelrc

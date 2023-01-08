@@ -1,0 +1,10 @@
+load("@rules_cc//cc:defs.bzl", "cc_test")
+
+cc_test(
+    name = "dummy_test",
+    srcs = ["dummy.cpp"],
+    deps = [
+        "//:constrained_value",
+        "@boost_ut",
+    ],
+)
