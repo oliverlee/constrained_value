@@ -1,10 +1,23 @@
 load("@rules_cc//cc:defs.bzl", "cc_test")
 
 cc_test(
-    name = "dummy_test",
-    srcs = ["dummy.cpp"],
+    name = "assignable",
+    size = "small",
+    srcs = ["assignable_test.cpp"],
     deps = [
         "//:constrained_value",
         "@boost_ut",
     ],
 )
+
+cc_test(
+    name = "constructible",
+    size = "small",
+    srcs = ["constructible_test.cpp"],
+    deps = [
+        "//:constrained_value",
+        "@boost_ut",
+    ],
+)
+
+# TODO convertible
