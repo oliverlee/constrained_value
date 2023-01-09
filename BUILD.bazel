@@ -33,6 +33,7 @@ cc_library(
         "src/adaptor.hpp",
         "src/assert_predicate.hpp",
         "src/constant.hpp",
+        "src/constrained_value.hpp",
         "src/detail/type_name.hpp",
         "src/predicate.hpp",
         "src/source_location.hpp",
