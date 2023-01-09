@@ -5,6 +5,7 @@
 
 #include <concepts>
 #include <functional>
+#include <type_traits>
 
 /// Define types with constraints
 namespace constrained_value {
@@ -77,6 +78,38 @@ public:
                               source_location sl = source_location::current())
       : value_{(assert_predicate(value, valid, __PRETTY_FUNCTION__, sl), value)}
   {}
+
+  /// Return a reference to the underlying value
+  /// @{
+  [[nodiscard]] constexpr auto value() & noexcept -> const T& { return value_; }
+  [[nodiscard]] constexpr auto value() const& noexcept -> const T&
+  {
+    return value_;
+  }
+  /// @}
+
+  /// Return the underlying value
+  /// @{
+  [[nodiscard]] constexpr auto
+  value() && noexcept(std::is_nothrow_move_constructible_v<T>) -> T
+  {
+    return std::move(value_);
+  }
+  [[nodiscard]] constexpr auto
+  value() const&& noexcept(std::is_nothrow_copy_constructible_v<T>) -> T
+  {
+    return value_;
+  }
+  /// @}
+
+  /// Implicit conversion to the underlying type
+  /// @{
+  [[nodiscard]] constexpr operator T() const
+      noexcept(std::is_nothrow_copy_constructible_v<T>)
+  {
+    return value_;
+  }
+  /// @}
 };
 
 /// A value always greater than zero
