@@ -1,16 +1,20 @@
 #pragma once
 
-#include "src/detail/type_name.hpp"
 #include "src/source_location.hpp"
 
 #include <concepts>
-#include <cstdlib>
 #include <functional>
-#include <iostream>
 
 namespace constrained_value {
 
-template <typename T, std::predicate<T> P>
+/// Checks if a predicate is satisfied for a value and calls a handler if not
+/// @tparam V violation policy
+/// @param value value of a type
+/// @param predicate function representing a type invariant
+/// @param caller function verifying the type invariant
+/// @param source_location source location invoking caller
+///
+template <typename V, typename T, std::predicate<T> P>
 constexpr auto assert_predicate(
     const T& value, const P& predicate, const char* caller, source_location sl)
     -> void
@@ -19,12 +23,7 @@ constexpr auto assert_predicate(
     return;
   }
 
-  std::cerr << "file: " << sl.file_name() << "(" << sl.line() << ":"
-            << sl.column() << ") `" << sl.function_name() << "`: "
-            << "contract violated in `" << caller << "`. "
-            << detail::type_name<P>() << "(" << value << ") is false.\n";
-
-  std::abort();
+  std::invoke(V{}, value, predicate, caller, sl);
 }
 
 }  // namespace constrained_value

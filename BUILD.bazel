@@ -36,6 +36,7 @@ cc_library(
         "src/detail/type_name.hpp",
         "src/predicate.hpp",
         "src/source_location.hpp",
+        "src/violation_policy.hpp",
     ],
     hdrs = ["constrained_value.hpp"],
     include_prefix = "constrained_value",
