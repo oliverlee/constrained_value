@@ -49,3 +49,13 @@ cc_test(
         "@boost_ut",
     ],
 )
+
+cc_test(
+    name = "total_order_constrained_values_test",
+    size = "small",
+    srcs = ["total_order_constrained_values_test.cpp"],
+    deps = [
+        "//:constrained_value",
+        "@boost_ut",
+    ],
+)
