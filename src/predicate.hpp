@@ -11,6 +11,20 @@ namespace constrained_value {
 /// Common predicates used in defining type invariants
 namespace predicate {
 
+/// Checks if one value is less than another value
+///
+/// Binary predicate function object that applies `std::ranges::less` to two
+/// values. This function object allows a non-type template parameter to be
+/// bound to the invocation of `std::ranges::less`.
+///
+/// ~~~{.cpp}
+/// less{}(+3.0, 0.0); // false
+/// less{}(-3.0, 0.0); // true
+/// ~~~
+///
+struct less : adaptor::nttp_bindable<std::ranges::less>
+{};
+
 /// Checks if one value is greater than another value
 ///
 /// Binary predicate function object that applies `std::ranges::greater` to two
@@ -23,6 +37,19 @@ namespace predicate {
 /// ~~~
 ///
 struct greater : adaptor::nttp_bindable<std::ranges::greater>
+{};
+
+/// Checks if a value is less than zero
+///
+/// Unary predicate function object used to determine if a value is negative.
+/// For a value of type `T`, `T{}` is treated as zero.
+///
+/// ~~~{.cpp}
+/// negative{}(+3.0); // false
+/// negative{}(-3.0); // true
+/// ~~~
+///
+struct negative : greater::bind_back<constant::Zero{}>
 {};
 
 /// Checks if a value is greater than zero
