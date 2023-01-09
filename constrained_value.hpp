@@ -2,6 +2,7 @@
 
 #include "src/assert_predicate.hpp"
 #include "src/predicate.hpp"
+#include "src/violation_policy.hpp"
 
 #include <concepts>
 #include <functional>
@@ -10,8 +11,11 @@
 /// Define types with constraints
 namespace constrained_value {
 
+namespace detail {
+
 /// A value that always satisfies an invariant
 /// @tparam T underlying type
+/// @tparam V invariant violation policy
 /// @tparam P predicate describing a type invariant
 ///
 /// `constrained_value` wraps an underlying type `T` while validating that the
@@ -39,11 +43,11 @@ namespace constrained_value {
 /// options{.alpha = 0.1, ...};
 /// ~~~
 ///
-// TODO specify violation policy
 // TODO allow multiple predicates
 // TODO handle non-copyable types
-template <std::copyable T, std::predicate<T> P>
-  requires std::default_initializable<P>
+template <std::copyable T, typename V, std::predicate<T> P>
+  requires std::default_initializable<P> and
+           violation_policy<V, T, P, source_location>
 class constrained_value
 {
   T value_;
@@ -63,7 +67,7 @@ public:
   ///
   constexpr constrained_value(source_location sl = source_location::current())
     requires std::default_initializable<T>
-      : value_{(assert_predicate(T{}, valid, __PRETTY_FUNCTION__, sl), T{})}
+      : value_{(assert_predicate<V>(T{}, valid, __PRETTY_FUNCTION__, sl), T{})}
   {}
 
   /// Construct a constrained_value
@@ -76,7 +80,8 @@ public:
   template <std::same_as<T> U>
   constexpr constrained_value(U value,
                               source_location sl = source_location::current())
-      : value_{(assert_predicate(value, valid, __PRETTY_FUNCTION__, sl), value)}
+      : value_{
+            (assert_predicate<V>(value, valid, __PRETTY_FUNCTION__, sl), value)}
   {}
 
   /// Return a reference to the underlying value
@@ -111,6 +116,31 @@ public:
   }
   /// @}
 };
+
+/// Obtain the constrained_value type
+/// @tparam T underlying type
+/// @tparam V invariant violation policy
+/// @tparam P predicate
+///
+/// Allow a user to omit the invariant violation policy when specifying a
+/// `constrained_value` type.
+///
+/// @{
+template <typename T, typename V, typename P = void>
+struct constrained_value_ : std::type_identity<constrained_value<T, V, P>>
+{};
+
+template <typename T, typename P>
+struct constrained_value_<T, P, void>
+    : std::type_identity<constrained_value<T, on_violation::print_and_abort, P>>
+{};
+/// @}
+
+}  // namespace detail
+
+/// @copydoc detail::constrained_value
+template <typename... Xs>
+using constrained_value = typename detail::constrained_value_<Xs...>::type;
 
 /// A value always greater than zero
 /// @tparam T underlying type
