@@ -29,3 +29,13 @@ cc_test(
         "@boost_ut",
     ],
 )
+
+cc_test(
+    name = "violation_policy",
+    size = "small",
+    srcs = ["violation_policy_test.cpp"],
+    deps = [
+        "//:constrained_value",
+        "@boost_ut",
+    ],
+)
