@@ -10,7 +10,8 @@ auto main() -> int
 
   test("constrained value is assignable") = [] {
     static constexpr auto x = (cnv::positive<double>{1.0} = 2.0);
-    (void)x;
+
+    static_assert(2.0_d == x);
   };
 
   test("aborts when assigning an invalid value") = [] {

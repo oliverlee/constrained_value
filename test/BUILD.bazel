@@ -20,4 +20,12 @@ cc_test(
     ],
 )
 
-# TODO convertible
+cc_test(
+    name = "convertible",
+    size = "small",
+    srcs = ["convertible_test.cpp"],
+    deps = [
+        "//:constrained_value",
+        "@boost_ut",
+    ],
+)
