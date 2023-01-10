@@ -1,0 +1,38 @@
+name: build_and_test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ '*' ]
+
+jobs:
+  build_and_test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        toolchain: [llvm] # TODO add gcc
+        bazel_command:
+          - build --config=clang-format
+          - build --config=clang-tidy
+          - test
+          - test --features=asan
+          - test --features=tsan
+
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v3
+
+    - uses: bazelbuild/setup-bazelisk@v2
+
+    - name: mount bazel cache
+      uses: actions/cache@v3
+      with:
+        path: "~/.cache/bazel"
+        key: bazel
+
+    - run: |
+        bazel \
+          --bazelrc=.github/workflows/ci.bazelrc \
+          ${{ matrix.bazel_command }} //...
