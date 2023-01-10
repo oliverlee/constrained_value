@@ -40,13 +40,40 @@ struct nttp_bindable : F
     /// ~~~
     ///
     template <class... Head>
-    constexpr auto operator()(Head&&... head) const noexcept(
-        noexcept(std::invoke(F{}, std::forward<Head>(head)..., tail...)))
+    constexpr auto operator()(Head&&... head) const  //
+        noexcept(noexcept(
+            std::invoke(F{}, std::forward<Head>(head)..., tail...)))  //
         -> decltype(std::invoke(F{}, std::forward<Head>(head)..., tail...))
     {
       return std::invoke(F{}, std::forward<Head>(head)..., tail...);
     }
   };
+};
+
+/// Applies a projection to arguments before invoking a function object
+/// @tparam F function object
+/// @tparam Ps projections
+///
+/// Function object adaptor that adds an overload to F, applying projections to
+/// ...
+/// TODO
+///
+template <std::default_initializable F, std::default_initializable... Ps>
+struct projection : F
+{
+  // TODO expose operator() from F?
+  // TODO does this projection always apply, even if more args are passed?
+
+  template <typename... Args>
+    requires(sizeof...(Args) == sizeof...(Ps))
+  constexpr auto operator()(Args&&... args) const  //
+      noexcept(noexcept(
+          std::invoke(F{}, std::invoke(Ps{}, std::forward<Args>(args))...)))  //
+      -> decltype(std::invoke(F{},
+                              std::invoke(Ps{}, std::forward<Args>(args))...))
+  {
+    return std::invoke(F{}, std::invoke(Ps{}, std::forward<Args>(args))...);
+  }
 };
 
 }  // namespace adaptor

@@ -87,4 +87,10 @@ using strictly_bounded =
                       predicate::greater::bind_back<lo>,
                       predicate::less::bind_back<hi>>;
 
+/// A value with absolute value equal to one
+/// @tparam T underlying type
+///
+template <typename T>
+using unity = constrained_value<T, predicate::unity>;
+
 }  // namespace constrained_value
