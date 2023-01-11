@@ -2,6 +2,10 @@ workspace(name = "constrained_value")
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
+BAZEL_BOOTLIN_COMMIT = "29975c2ae60ba85130a0245fc71e219132ae184d"
+
+BAZEL_BOOTLIN_SHA = "7514d4d494b59c883501190a44c60983e355794fac9c7a70b6072537a4daffd2"
+
 BAZEL_TOOLCHAIN_COMMIT = "295952280d14598c54df0028fb69ac77b2d35b08"
 
 BAZEL_TOOLCHAIN_SHA = "8d0215b46ff071cc753c66475b465bee6bc19989c37b5ad86077aec60a1f5dad"
@@ -19,7 +23,18 @@ BOOST_UT_COMMIT = "7c667d99716eb25db3fabb0d9114c8ad46ad7464"
 BOOST_UT_SHA = "5f29c31bcbdb1083525ff536b1c09f211754424108fd6bf78a5412c3463eb98d"
 
 http_archive(
-    name = "com_grail_bazel_toolchain",
+    name = "bazel_bootlin",
+    sha256 = BAZEL_BOOTLIN_SHA,
+    strip_prefix = "bazel_bootlin-{commit}".format(
+        commit = BAZEL_BOOTLIN_COMMIT,
+    ),
+    url = "https://github.com/oliverlee/bazel_bootlin/archive/{commit}.tar.gz".format(
+        commit = BAZEL_BOOTLIN_COMMIT,
+    ),
+)
+
+http_archive(
+    name = "bazel_toolchain",
     sha256 = BAZEL_TOOLCHAIN_SHA,
     strip_prefix = "bazel-toolchain-{commit}".format(
         commit = BAZEL_TOOLCHAIN_COMMIT,
@@ -72,23 +87,37 @@ cc_library(
     ),
 )
 
-load("@com_grail_bazel_toolchain//toolchain:deps.bzl", "bazel_toolchain_dependencies")
-load("@com_grail_bazel_toolchain//toolchain:rules.bzl", "llvm_toolchain")
+CXXFLAGS = [
+    "-std=c++20",
+    "-fdiagnostics-color=always",
+    "-Werror",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Wconversion",
+]
+
+load("@bazel_bootlin//:defs.bzl", "bootlin_toolchain")
+
+bootlin_toolchain(
+    name = "gcc_x86-64_2022.08-1",
+    architecture = "x86-64",
+    buildroot_version = "2022.08-1",
+    extra_cxxflags = CXXFLAGS,
+)
+
+register_toolchains(
+    "@gcc_x86-64_2022.08-1//:toolchain",
+)
+
+load("@bazel_toolchain//toolchain:deps.bzl", "bazel_toolchain_dependencies")
+load("@bazel_toolchain//toolchain:rules.bzl", "llvm_toolchain")
 
 bazel_toolchain_dependencies()
 
 llvm_toolchain(
     name = "llvm_toolchain",
-    cxx_flags = {"": [
-        "-std=c++20",
-        "-stdlib=libc++",
-        "-fdiagnostics-color=always",
-        "-Werror",
-        "-Wall",
-        "-Wextra",
-        "-Wpedantic",
-        "-Wconversion",
-    ]},
+    cxx_flags = {"": ["-stdlib=libc++"] + CXXFLAGS},
     cxx_standard = {"": "c++20"},
     llvm_version = "15.0.6",
 )

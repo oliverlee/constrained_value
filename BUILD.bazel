@@ -27,6 +27,16 @@ clang_tidy_apply_fixes(
     tidy_config = ":tidy_config",
 )
 
+alias(
+    name = "llvm15",
+    actual = "@llvm_toolchain//:cc-toolchain-x86_64-linux",
+)
+
+alias(
+    name = "gcc11",
+    actual = "@gcc_x86-64_2022.08-1//:toolchain",
+)
+
 cc_library(
     name = "constrained_value",
     srcs = [

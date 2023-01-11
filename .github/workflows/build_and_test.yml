@@ -12,13 +12,14 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        toolchain: [llvm] # TODO this is simply a reminder to add gcc
         bazel_command:
-          - build --config=clang-format
-          - build --config=clang-tidy
-          - test
-          - test --features=asan
-          - test --features=tsan
+          - build --extra_toolchains=":llvm15" --config=clang-format
+          - build --extra_toolchains=":llvm15" --config=clang-tidy
+
+          - test --extra_toolchains=":llvm15"
+          - test --extra_toolchains=":llvm15" --features=asan
+          - test --extra_toolchains=":llvm15" --features=tsan
+          - test --extra_toolchains=":gcc11"
           # TODO fix ubsan feature with llvm toolchain
 
     runs-on: ${{ matrix.os }}
