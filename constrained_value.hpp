@@ -36,6 +36,21 @@ using positive = constrained_value<T, predicate::positive>;
 template <std::totally_ordered T>
 using nonpositive = constrained_value<T, predicate::nonpositive>;
 
+/// A value equal to another value
+/// @tparam T underlying type
+/// @tparam arg
+///
+template <std::equality_comparable T, auto arg>
+using equal_to = constrained_value<T, predicate::equal_to::bind_back<arg>>;
+
+/// A value not equal to anarg value
+/// @tparam T underlying type
+/// @tparam arg
+///
+template <std::equality_comparable T, auto arg>
+using not_equal_to =
+    constrained_value<T, predicate::not_equal_to::bind_back<arg>>;
+
 /// A value less than a supremum
 /// @tparam T underlying type
 /// @tparam sup
