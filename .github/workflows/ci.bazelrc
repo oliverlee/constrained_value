@@ -5,6 +5,8 @@ build --show_timestamps
 build --announce_rc
 build --color=yes
 build --terminal_columns=120
+build --remote_download_minimal
 
 test --test_output=all
 test --test_verbose_timeout_warnings
+

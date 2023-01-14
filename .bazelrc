@@ -1,10 +1,14 @@
 build --incompatible_enable_cc_toolchain_resolution
+build --action_env="BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1"
 
 build:clang-format --aspects //:aspects.bzl%clang_format
 build:clang-format --output_groups=report
 
 build:clang-tidy --aspects //:aspects.bzl%clang_tidy
 build:clang-tidy --output_groups=report
+
+# no-op config
+build:default --
 
 test --test_output=errors
 
