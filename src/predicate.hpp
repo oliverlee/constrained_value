@@ -11,6 +11,38 @@ namespace constrained_value {
 /// Common predicates used in defining type invariants
 namespace predicate {
 
+/// Checks if a value is equal to another value
+///
+/// Binary predicate function object that applies `std::ranges::equal_to`
+/// to two values. This function object allows a non-type template parameter to
+/// be bound to the invocation of `std::ranges::equal_to`.
+///
+/// ~~~{.cpp}
+/// equal_to{}(3.0, 3.0); // true
+/// equal_to{}(3.0, 3);   // true
+/// equal_to{}(3.0, 2.9); // false
+/// equal_to{}(3.0, 3.1); // false
+/// ~~~
+///
+struct equal_to : adaptor::nttp_bindable<std::ranges::equal_to>
+{};
+
+/// Checks if a value is not equal to another value
+///
+/// Binary predicate function object that applies `std::ranges::not_equal_to` to
+/// two values. This function object allows a non-type template parameter to be
+/// bound to the invocation of `std::ranges::not_equal_to`.
+///
+/// ~~~{.cpp}
+/// not_equal_to{}(3.0, 3.0); // false
+/// not_equal_to{}(3.0, 3);   // false
+/// not_equal_to{}(3.0, 2.9); // true
+/// not_equal_to{}(3.0, 3.1); // true
+/// ~~~
+///
+struct not_equal_to : adaptor::nttp_bindable<std::ranges::not_equal_to>
+{};
+
 /// Checks if one value is less than another value
 ///
 /// Binary predicate function object that applies `std::ranges::less` to two

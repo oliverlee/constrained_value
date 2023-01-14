@@ -1,6 +1,7 @@
 #include "constrained_value/constrained_value.hpp"
 
 #include <boost/ut.hpp>
+#include <cmath>
 
 namespace cnv = ::constrained_value;
 
@@ -39,6 +40,26 @@ auto main() -> int
     expect(constant<-double{} == cnv::nonpositive<double>{-double{}}>);
     expect(constant<+double{} == cnv::nonpositive<double>{+double{}}>);
     expect(aborts([] { cnv::nonpositive<double>{+alpha<double>}; }));
+  };
+
+  test("equal to constrained_value") = [] {
+    expect(aborts([] { cnv::equal_to<double, 0>{-double{1}}; }));
+    expect(constant<double{} == cnv::equal_to<double, 0>{double{}}>);
+    expect(constant<double{} == cnv::equal_to<double, cnv::constant::Zero{}>{double{}}>);
+    expect(aborts([] { cnv::equal_to<double, 0>{+double{1}}; }));
+
+    expect(aborts([] { cnv::equal_to<double, 0>{std::nextafter(double{}, +1.0)}; }));
+    expect(aborts([] { cnv::equal_to<double, 0>{std::nextafter(double{}, -1.0)}; }));
+  };
+
+  test("not equal to constrained_value") = [] {
+    expect(constant<-double{1} == cnv::not_equal_to<double, 0>{-double{1}}>);
+    expect(aborts([] { cnv::not_equal_to<double, 0>{double{}}; }));
+    expect(aborts([] { cnv::not_equal_to<double, cnv::constant::Zero{}>{double{}}; }));
+    expect(constant<+double{1} == cnv::not_equal_to<double, 0>{+double{1}}>);
+
+    expect(0.0_d < cnv::not_equal_to<double, 0>{std::nextafter(double{}, +1.0)});
+    expect(0.0_d > cnv::not_equal_to<double, 0>{std::nextafter(double{}, -1.0)});
   };
 
   test("less constrained_value") = [] {

@@ -54,7 +54,7 @@ struct Zero
 
   template <std::default_initializable T>
     requires(not std::same_as<T, Zero> and std::three_way_comparable<T>)
-  [[nodiscard]] friend auto
+  [[nodiscard]] friend constexpr auto
   operator==(const T& x, const Zero&) noexcept(noexcept(x == T{}))
   {
     return x == T{};
