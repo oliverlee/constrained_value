@@ -7,22 +7,14 @@ on:
     branches: [ '*' ]
 
 jobs:
-  build_and_test:
+  build:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]
-        bazel_command:
-          - build --extra_toolchains=":llvm15" --config=clang-format
-          - build --extra_toolchains=":llvm15" --config=clang-tidy
+        toolchain: [llvm15]
+        config: [clang-format, clang-tidy]
 
-          - test --extra_toolchains=":llvm15"
-          - test --extra_toolchains=":llvm15" --features=asan
-          - test --extra_toolchains=":llvm15" --features=tsan
-          - test --extra_toolchains=":gcc11"
-          # TODO fix ubsan feature with llvm toolchain
-
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
 
@@ -37,4 +29,43 @@ jobs:
     - run: |
         bazel \
           --bazelrc=.github/workflows/ci.bazelrc \
-          ${{ matrix.bazel_command }} //...
+          build \
+          --extra_toolchains=${{ matrix.toolchain }} \
+          --config=${{ matrix.config}} \
+          //...
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        toolchain: [gcc11, llvm15]
+        feature: ['']
+        include:
+          - os: ubuntu-latest
+            toolchain: llvm15
+            feature: asan
+          - os: ubuntu-latest
+            toolchain: llvm15
+            feature: tsan
+          - os: ubuntu-latest
+            toolchain: llvm15
+            feature: ubsan
+
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - uses: bazelbuild/setup-bazelisk@v2
+
+    - name: mount bazel cache
+      uses: actions/cache@v3
+      with:
+        path: "~/.cache/bazel"
+        key: bazel
+
+    - run: |
+        bazel \
+          --bazelrc=.github/workflows/ci.bazelrc \
+          test \
+          --extra_toolchains=${{ matrix.toolchain }} \
+          --features=${{ matrix.feature }} \
+          //...
