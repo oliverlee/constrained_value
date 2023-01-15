@@ -69,3 +69,13 @@ cc_test(
         "@boost_ut",
     ],
 )
+
+cc_test(
+    name = "unit_constrained_value_test",
+    size = "small",
+    srcs = ["unit_constrained_value_test.cpp"],
+    deps = [
+        "//:constrained_value",
+        "@boost_ut",
+    ],
+)
