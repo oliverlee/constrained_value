@@ -40,7 +40,6 @@ alias(
 cc_library(
     name = "constrained_value",
     srcs = [
-        "src/adaptor.hpp",
         "src/algebra.hpp",
         "src/assert_predicate.hpp",
         "src/constant.hpp",
