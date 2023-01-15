@@ -7,6 +7,7 @@
 #include "src/projection.hpp"
 
 #include <concepts>
+#include <type_traits>
 #include <utility>
 
 /// Define types with constraints
@@ -14,19 +15,32 @@ namespace constrained_value {
 
 /// Verify that a value satisfies a constraint
 /// @tparam constraint specialization of `constrained_value`
-/// @tparam T type
+/// @tparam S explicitly specified constrained_value underlying type
+/// @tparam U value type
+/// @tparam T constrained_value underlying type
 ///
 /// Forwards a value if it satisfies the specified constraint, otherwise invokes
 /// the associated violation policy.
 ///
-template <template <typename> typename constraint, typename T>
-  requires detail::is_constrained_value_v<constraint<std::remove_cvref_t<T>>>
-constexpr auto ensure(T&& value) -> T&&
+/// In order to handle wrapper types (e.g. to allow floating point value as
+/// non-type template parameters with Clang), the constrained_value underlying
+/// type may be explicitly specified with `S`. If `S` is set to a non-`void`
+/// type, the underlying type `T` is set to `S`. Otherwise, `T` is deduced from
+/// `U`.
+///
+template <template <typename> typename constraint,
+          typename S = void,
+          typename U,
+          typename T = std::conditional_t<std::is_void_v<S>, U, S>>
+  requires(detail::is_constrained_value_v<
+               constraint<std::remove_cvref_t<T>>> and
+           std::convertible_to<U, T>)
+constexpr auto ensure(U&& value) -> U&&
 {
-  if (not constraint<T>::valid(value)) {
-    (void)constraint<T>{value};
+  if (not constraint<T>::valid(static_cast<T>(value))) {
+    (void)constraint<T>{static_cast<T>(value)};
   }
-  return std::forward<T>(value);
+  return std::forward<U>(value);
 }
 
 /// A value always less than zero
@@ -130,7 +144,7 @@ using strictly_bounded =
 /// @tparam tol nonnegative absolute tolerance
 ///
 template <algebra::additive_group T, auto arg, auto tol>
-using near = bounded<T, arg - ensure<nonnegative>(tol), arg + tol>;
+using near = bounded<T, arg - ensure<nonnegative, T>(tol), arg + tol>;
 
 /// A value with magnitude one
 /// @tparam T underlying type
