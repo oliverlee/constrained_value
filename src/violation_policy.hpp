@@ -48,14 +48,6 @@ struct on_violation
       std::abort();
     }
   };
-
-  /// Violation policy that does nothing
-  struct ignore
-  {
-    template <class... Args>
-    constexpr auto operator()(Args&&...) const noexcept -> void
-    {}
-  };
 };
 
 }  // namespace constrained_value

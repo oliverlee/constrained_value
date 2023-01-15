@@ -1,19 +1,18 @@
 #pragma once
 
 #include "src/assert_predicate.hpp"
+#include "src/violation_policy.hpp"
 
 #include <concepts>
-#include <tuple>
 #include <type_traits>
 #include <utility>
 
 namespace constrained_value {
-namespace detail {
 
 /// A value that always satisfies an invariant
 /// @tparam T underlying type
+/// @tparam P predicates describing a type invariant
 /// @tparam V invariant violation policy
-/// @tparam Ps predicates describing a type invariant
 ///
 /// `constrained_value` wraps an underlying type `T` while validating that the
 /// contained value satisfies an invariant specified by `P`. On construction or
@@ -41,8 +40,12 @@ namespace detail {
 /// ~~~
 ///
 // TODO handle non-copyable types
-template <std::copyable T, typename V, std::predicate<T>... Ps>
-  requires(sizeof...(Ps) != 0 and (std::default_initializable<Ps> and ...))
+template <
+    std::copyable T,
+    std::predicate<T> P,
+    violation_policy<T, P, source_location> V = on_violation::print_and_abort>
+  requires(std::same_as<T, std::remove_cvref_t<T>> and
+           std::default_initializable<P>)
 class constrained_value
 {
   T value_;
@@ -52,22 +55,13 @@ public:
   ///
   using underlying_type = T;
 
-  /// Violation policy
+  /// Predicate type
+  ///
+  using predicate_type = P;
+
+  /// Violation policy type
   ///
   using violation_policy_type = V;
-
-  /// Predicates
-  ///
-  using predicate_types = std::tuple<Ps...>;
-
-  /// Determine if a value satisfies the invariants of `constrained_value`
-  ///
-  static constexpr auto valid(const T& value)  //
-      noexcept(noexcept(assert_predicates<on_violation::ignore, Ps...>(value)))
-          -> bool
-  {
-    return assert_predicates<on_violation::ignore, Ps...>(value);
-  }
 
   /// Default construct a constrained_value
   /// @requires `std::default_initializable<T>`
@@ -75,7 +69,7 @@ public:
   ///
   constexpr constrained_value(source_location sl = source_location::current())
     requires std::default_initializable<T>
-      : value_{(assert_predicates<V, Ps...>(T{}, __PRETTY_FUNCTION__, sl), T{})}
+      : value_{(assert_predicate<P, V>(T{}, __PRETTY_FUNCTION__, sl), T{})}
   {}
 
   /// Construct a constrained_value
@@ -88,8 +82,7 @@ public:
   template <std::same_as<T> U>
   constexpr constrained_value(U value,
                               source_location sl = source_location::current())
-      : value_{(assert_predicates<V, Ps...>(value, __PRETTY_FUNCTION__, sl),
-                value)}
+      : value_{(assert_predicate<P, V>(value, __PRETTY_FUNCTION__, sl), value)}
   {}
 
   /// Return a reference to the underlying value
@@ -125,36 +118,12 @@ public:
   /// @}
 };
 
-/// Obtain the constrained_value type
-/// @tparam T underlying type
-/// @tparam V invariant violation policy
-/// @tparam P predicate
-///
-/// Allow a user to omit the invariant violation policy when specifying a
-/// `constrained_value` type.
-///
-/// @{
-template <typename T, typename V, typename... Ps>
-auto set_violation_policy() -> constrained_value<T, V, Ps...>;
-
-template <typename T, typename P0, typename... Ps>
-  requires std::predicate<P0, T>
-auto set_violation_policy()
-    -> constrained_value<T, on_violation::print_and_abort, P0, Ps...>;
-/// @}
-
 /// Checks if a type is a specialization of `constrained_value`
 /// @{
 template <typename...>
-constexpr auto is_constrained_value_v = false;
+inline constexpr auto is_constrained_value_v = false;
 template <typename... Ts>
-constexpr auto is_constrained_value_v<constrained_value<Ts...>> = true;
+inline constexpr auto is_constrained_value_v<constrained_value<Ts...>> = true;
 /// @}
-
-}  // namespace detail
-
-/// @copydoc detail::constrained_value
-template <typename T, typename V, typename... Ps>
-using constrained_value = decltype(detail::set_violation_policy<T, V, Ps...>());
 
 }  // namespace constrained_value

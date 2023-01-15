@@ -8,9 +8,9 @@ struct nonpositive_value_error
 {};
 
 using positive_double = cnv::constrained_value<
-    double,
-    decltype([](auto&&...) { throw nonpositive_value_error{}; }),
-    cnv::predicate::positive>;
+    double,                    //
+    cnv::predicate::positive,  //
+    decltype([](auto&&...) { throw nonpositive_value_error{}; })>;
 
 auto main() -> int
 {
