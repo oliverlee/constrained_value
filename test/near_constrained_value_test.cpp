@@ -24,6 +24,15 @@ auto main() -> int
     invalid<cnv::near, 0, 1>(std::nextafter(-1.0, -2.0));
     invalid<cnv::near, 0, 1>(+2.0);
     invalid<cnv::near, 0, 1>(-2.0);
+
+    using cnv::constant::_;
+
+    constexpr_valid<cnv::near, _(1.0), _(0.1)>(0.9);
+    constexpr_valid<cnv::near, _(1.0), _(0.1)>(1.0);
+    constexpr_valid<cnv::near, _(1.0), _(0.1)>(1.1);
+
+    invalid<cnv::near, _(1.0), _(0.1)>(std::nextafter(1.0 + 0.1, +2.0));
+    invalid<cnv::near, _(1.0), _(0.1)>(std::nextafter(1.0 - 0.1, -2.0));
   };
 }
 
