@@ -1,4 +1,14 @@
-load("@rules_cc//cc:defs.bzl", "cc_test")
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+
+cc_library(
+    name = "utility",
+    hdrs = ["utility.hpp"],
+    include_prefix = "test",
+    deps = [
+        "//:constrained_value",
+        "@boost_ut",
+    ],
+)
 
 cc_test(
     name = "assignable",
@@ -54,28 +64,19 @@ cc_test(
     name = "total_order_constrained_values_test",
     size = "small",
     srcs = ["total_order_constrained_values_test.cpp"],
-    deps = [
-        "//:constrained_value",
-        "@boost_ut",
-    ],
+    deps = [":utility"],
 )
 
 cc_test(
     name = "near_constrained_value_test",
     size = "small",
     srcs = ["near_constrained_value_test.cpp"],
-    deps = [
-        "//:constrained_value",
-        "@boost_ut",
-    ],
+    deps = [":utility"],
 )
 
 cc_test(
     name = "unit_constrained_value_test",
     size = "small",
     srcs = ["unit_constrained_value_test.cpp"],
-    deps = [
-        "//:constrained_value",
-        "@boost_ut",
-    ],
+    deps = [":utility"],
 )

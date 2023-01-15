@@ -1,115 +1,118 @@
 #include "constrained_value/constrained_value.hpp"
+#include "utility.hpp"
 
 #include <boost/ut.hpp>
 #include <cmath>
 
-namespace cnv = ::constrained_value;
-
 // positive test constant
-template <typename T>
-static constexpr auto alpha = T{10};
+static constexpr auto alpha = double{10};
 
 auto main() -> int
 {
+  namespace cnv = ::constrained_value;
+  using namespace cnv::test;
   using namespace ::boost::ut;
 
-  // clang-format off
   test("negative constrained_value") = [] {
-    expect(constant<-alpha<double> == cnv::negative<double>{-alpha<double>}>);
-    expect(aborts([] { cnv::negative<double>{-double{}}; }));
-    expect(aborts([] { cnv::negative<double>{+double{}}; }));
-    expect(aborts([] { cnv::negative<double>{+alpha<double>}; }));
+    constexpr_valid<cnv::negative>(-alpha);
+    invalid<cnv::negative>(-0.0);
+    invalid<cnv::negative>(+0.0);
+    invalid<cnv::negative>(+alpha);
   };
 
   test("nonnegative constrained_value") = [] {
-    expect(aborts([] { cnv::nonnegative<double>{-alpha<double>}; }));
-    expect(constant<-double{} == cnv::nonnegative<double>{-double{}}>);
-    expect(constant<+double{} == cnv::nonnegative<double>{+double{}}>);
-    expect(constant<+alpha<double> == cnv::nonnegative<double>{+alpha<double>}>);
+    invalid<cnv::nonnegative>(-alpha);
+    constexpr_valid<cnv::nonnegative>(-0.0);
+    constexpr_valid<cnv::nonnegative>(+0.0);
+    constexpr_valid<cnv::nonnegative>(+alpha);
   };
 
   test("positive constrained_value") = [] {
-    expect(aborts([] { cnv::positive<double>{-alpha<double>}; }));
-    expect(aborts([] { cnv::positive<double>{-double{}}; }));
-    expect(aborts([] { cnv::positive<double>{+double{}}; }));
-    expect(constant<+alpha<double> == cnv::positive<double>{+alpha<double>}>);
+    invalid<cnv::positive>(-alpha);
+    invalid<cnv::positive>(-0.0);
+    invalid<cnv::positive>(+0.0);
+    constexpr_valid<cnv::positive>(+alpha);
   };
 
   test("nonpositive constrained_value") = [] {
-    expect(constant<-alpha<double> == cnv::nonpositive<double>{-alpha<double>}>);
-    expect(constant<-double{} == cnv::nonpositive<double>{-double{}}>);
-    expect(constant<+double{} == cnv::nonpositive<double>{+double{}}>);
-    expect(aborts([] { cnv::nonpositive<double>{+alpha<double>}; }));
+    constexpr_valid<cnv::nonpositive>(-alpha);
+    constexpr_valid<cnv::nonpositive>(-0.0);
+    constexpr_valid<cnv::nonpositive>(+0.0);
+    invalid<cnv::nonpositive>(+alpha);
   };
 
   test("equal to constrained_value") = [] {
-    expect(aborts([] { cnv::equal_to<double, 0>{-double{1}}; }));
-    expect(constant<double{} == cnv::equal_to<double, 0>{double{}}>);
-    expect(constant<double{} == cnv::equal_to<double, cnv::constant::Zero{}>{double{}}>);
-    expect(aborts([] { cnv::equal_to<double, 0>{+double{1}}; }));
+    constexpr_valid<cnv::equal_to, 0>(-0.0);
+    constexpr_valid<cnv::equal_to, 0>(+0.0);
 
-    expect(aborts([] { cnv::equal_to<double, 0>{std::nextafter(double{}, +1.0)}; }));
-    expect(aborts([] { cnv::equal_to<double, 0>{std::nextafter(double{}, -1.0)}; }));
+    constexpr_valid<cnv::equal_to, cnv::constant::Zero{}>(-0.0);
+    constexpr_valid<cnv::equal_to, cnv::constant::Zero{}>(+0.0);
+
+    invalid<cnv::equal_to, 0>(-alpha);
+    invalid<cnv::equal_to, 0>(+alpha);
+
+    invalid<cnv::equal_to, 0>(std::nextafter(0.0, +1.0));
+    invalid<cnv::equal_to, 0>(std::nextafter(0.0, -1.0));
   };
 
   test("not equal to constrained_value") = [] {
-    expect(constant<-double{1} == cnv::not_equal_to<double, 0>{-double{1}}>);
-    expect(aborts([] { cnv::not_equal_to<double, 0>{double{}}; }));
-    expect(aborts([] { cnv::not_equal_to<double, cnv::constant::Zero{}>{double{}}; }));
-    expect(constant<+double{1} == cnv::not_equal_to<double, 0>{+double{1}}>);
+    constexpr_valid<cnv::not_equal_to, 0>(-1.0);
+    constexpr_valid<cnv::not_equal_to, 0>(+1.0);
 
-    expect(0.0_d < cnv::not_equal_to<double, 0>{std::nextafter(double{}, +1.0)});
-    expect(0.0_d > cnv::not_equal_to<double, 0>{std::nextafter(double{}, -1.0)});
+    invalid<cnv::not_equal_to, 0>(0.0);
+    invalid<cnv::not_equal_to, cnv::constant::Zero{}>(0.0);
+
+    valid<cnv::not_equal_to, 0>(std::nextafter(0.0, +1.0));
+    valid<cnv::not_equal_to, 0>(std::nextafter(0.0, -1.0));
   };
 
   test("less constrained_value") = [] {
-    expect(constant<-alpha<double> == cnv::less<double, 1>{-alpha<double>}>);
-    expect(constant<-double{} == cnv::less<double, 1>{-double{}}>);
-    expect(constant<+double{} == cnv::less<double, 1>{+double{}}>);
-    expect(aborts([] { cnv::less<double, 1>{+double{1}}; }));
-    expect(aborts([] { cnv::less<double, 1>{+alpha<double>}; }));
+    constexpr_valid<cnv::less, 1>(-alpha);
+    constexpr_valid<cnv::less, 1>(0.0);
+    invalid<cnv::less, 1>(1.0);
+    invalid<cnv::less, 1>(alpha);
   };
 
   test("less_equal constrained_value") = [] {
-    expect(constant<-alpha<double> == cnv::less_equal<double, 1>{-alpha<double>}>);
-    expect(constant<-double{} == cnv::less_equal<double, 1>{-double{}}>);
-    expect(constant<+double{} == cnv::less_equal<double, 1>{+double{}}>);
-    expect(constant<+double{1} == cnv::less_equal<double, 1>{+double{1}}>);
-    expect(aborts([] { cnv::less_equal<double, 1>{+alpha<double>}; }));
+    constexpr_valid<cnv::less_equal, 1>(-alpha);
+    constexpr_valid<cnv::less_equal, 1>(0.0);
+    constexpr_valid<cnv::less_equal, 1>(1.0);
+    invalid<cnv::less_equal, 1>(alpha);
   };
 
   test("greater constrained_value") = [] {
-    expect(aborts([] { cnv::greater<double, -1>{-alpha<double>}; }));
-    expect(aborts([] { cnv::greater<double, -1>{-double{1}}; }));
-    expect(constant<-double{} == cnv::greater<double, -1>{-double{}}>);
-    expect(constant<+double{} == cnv::greater<double, -1>{+double{}}>);
-    expect(constant<+alpha<double> == cnv::greater<double, -1>{+alpha<double>}>);
+    invalid<cnv::greater, 1>(-alpha);
+    invalid<cnv::greater, 1>(0.0);
+    invalid<cnv::greater, 1>(1.0);
+    constexpr_valid<cnv::greater, 1>(alpha);
   };
 
   test("greater_equal constrained_value") = [] {
-    expect(aborts([] { cnv::greater_equal<double, -1>{-alpha<double>}; }));
-    expect(constant<-double{1} == cnv::greater_equal<double, -1>{-double{1}}>);
-    expect(constant<-double{} == cnv::greater_equal<double, -1>{-double{}}>);
-    expect(constant<+double{} == cnv::greater_equal<double, -1>{+double{}}>);
-    expect(constant<+alpha<double> == cnv::greater_equal<double, -1>{+alpha<double>}>);
+    invalid<cnv::greater_equal, 1>(-alpha);
+    invalid<cnv::greater_equal, 1>(0.0);
+    constexpr_valid<cnv::greater_equal, 1>(1.0);
+    constexpr_valid<cnv::greater_equal, 1>(alpha);
   };
 
   test("bounded constrained_value") = [] {
-    expect(aborts([] { cnv::bounded<double, -1, +1>{-alpha<double>}; }));
-    expect(constant<-double{1} == cnv::bounded<double, -1, +1>{-double{1}}>);
-    expect(constant<-double{} == cnv::bounded<double, -1, +1>{-double{}}>);
-    expect(constant<+double{} == cnv::bounded<double, -1, +1>{+double{}}>);
-    expect(constant<+double{1} == cnv::bounded<double, -1, +1>{+double{1}}>);
-    expect(aborts([] { cnv::bounded<double, -1, +1>{+alpha<double>}; }));
+    invalid<cnv::bounded, -1, +1>(-alpha);
+    invalid<cnv::bounded, -1, +1>(+alpha);
+
+    constexpr_valid<cnv::bounded, -1, +1>(-1.0);
+    constexpr_valid<cnv::bounded, -1, +1>(+1.0);
+
+    constexpr_valid<cnv::bounded, -1, +1>(-0.0);
+    constexpr_valid<cnv::bounded, -1, +1>(+0.0);
   };
 
   test("strictly_bounded constrained_value") = [] {
-    expect(aborts([] { cnv::strictly_bounded<double, -1, +1>{-alpha<double>}; }));
-    expect(aborts([] { cnv::strictly_bounded<double, -1, +1>{-double{1}}; }));
-    expect(constant<-double{} == cnv::strictly_bounded<double, -1, +1>{-double{}}>);
-    expect(constant<+double{} == cnv::strictly_bounded<double, -1, +1>{+double{}}>);
-    expect(aborts([] { cnv::strictly_bounded<double, -1, +1>{+double{1}}; }));
-    expect(aborts([] { cnv::strictly_bounded<double, -1, +1>{+alpha<double>}; }));
+    invalid<cnv::strictly_bounded, -1, +1>(-alpha);
+    invalid<cnv::strictly_bounded, -1, +1>(+alpha);
+
+    invalid<cnv::strictly_bounded, -1, +1>(-1.0);
+    invalid<cnv::strictly_bounded, -1, +1>(+1.0);
+
+    constexpr_valid<cnv::strictly_bounded, -1, +1>(-0.0);
+    constexpr_valid<cnv::strictly_bounded, -1, +1>(+0.0);
   };
-  // clang-format on
 }
