@@ -1,7 +1,7 @@
 #pragma once
 
-#include "src/adaptor.hpp"
 #include "src/constant.hpp"
+#include "src/functional.hpp"
 
 #include <functional>
 
@@ -24,7 +24,7 @@ namespace predicate {
 /// equal_to{}(3.0, 3.1); // false
 /// ~~~
 ///
-struct equal_to : adaptor::nttp_bindable<std::ranges::equal_to>
+struct equal_to : functional::nttp_bindable<std::ranges::equal_to>
 {};
 
 /// Checks if a value is not equal to another value
@@ -40,7 +40,7 @@ struct equal_to : adaptor::nttp_bindable<std::ranges::equal_to>
 /// not_equal_to{}(3.0, 3.1); // true
 /// ~~~
 ///
-struct not_equal_to : adaptor::nttp_bindable<std::ranges::not_equal_to>
+struct not_equal_to : functional::nttp_bindable<std::ranges::not_equal_to>
 {};
 
 /// Checks if one value is less than another value
@@ -56,7 +56,7 @@ struct not_equal_to : adaptor::nttp_bindable<std::ranges::not_equal_to>
 /// less{}(-3.0, 0.0); // true
 /// ~~~
 ///
-struct less : adaptor::nttp_bindable<std::ranges::less>
+struct less : functional::nttp_bindable<std::ranges::less>
 {};
 
 /// Checks if one value is less than or equal to another value
@@ -72,7 +72,7 @@ struct less : adaptor::nttp_bindable<std::ranges::less>
 /// less_equal{}(-3.0, 0.0); // true
 /// ~~~
 ///
-struct less_equal : adaptor::nttp_bindable<std::ranges::less_equal>
+struct less_equal : functional::nttp_bindable<std::ranges::less_equal>
 {};
 
 /// Checks if one value is greater than another value
@@ -88,7 +88,7 @@ struct less_equal : adaptor::nttp_bindable<std::ranges::less_equal>
 /// greater{}(-3.0, 0.0); // false
 /// ~~~
 ///
-struct greater : adaptor::nttp_bindable<std::ranges::greater>
+struct greater : functional::nttp_bindable<std::ranges::greater>
 {};
 
 /// Checks if one value is greater than or equal to another value
@@ -104,7 +104,7 @@ struct greater : adaptor::nttp_bindable<std::ranges::greater>
 /// greater_equal{}(-3.0, 0.0); // false
 /// ~~~
 ///
-struct greater_equal : adaptor::nttp_bindable<std::ranges::greater_equal>
+struct greater_equal : functional::nttp_bindable<std::ranges::greater_equal>
 {};
 
 /// Checks if a value is less than zero
