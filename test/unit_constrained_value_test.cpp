@@ -1,33 +1,13 @@
 #include "constrained_value/constrained_value.hpp"
+#include "utility.hpp"
 
 #include <boost/ut.hpp>
 #include <complex>
 
-namespace cnv = ::constrained_value;
-
-template <template <typename> typename constraint, typename T>
-consteval auto constexpr_valid(T value)
-{
-  (void)constraint<T>{value};
-}
-
-template <template <typename> typename constraint, typename T>
-auto valid(T value)
-{
-  (void)constraint<T>{value};
-}
-
-template <template <typename> typename constraint, typename T>
-auto invalid(T value)
-{
-  using ::boost::ut::aborts;
-  using ::boost::ut::expect;
-
-  expect(aborts([&] { (void)constraint<T>{value}; }));
-}
-
 auto main() -> int
 {
+  namespace cnv = ::constrained_value;
+  using namespace cnv::test;
   using namespace ::boost::ut;
 
   test("unit constrained_value") = [] {
