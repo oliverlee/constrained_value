@@ -1,12 +1,31 @@
 #pragma once
 
+#include "src/algebra.hpp"
 #include "src/constrained_value.hpp"
 #include "src/predicate.hpp"
 
 #include <concepts>
+#include <utility>
 
 /// Define types with constraints
 namespace constrained_value {
+
+/// Verify that a value satisfies a constraint
+/// @tparam constraint specialization of `constrained_value`
+/// @tparam T type
+///
+/// Forwards a value if it satisfies the specified constraint, otherwise invokes
+/// the associated violation policy.
+///
+template <template <typename> typename constraint, typename T>
+  requires detail::is_constrained_value_v<constraint<std::remove_cvref_t<T>>>
+constexpr auto ensure(T&& value) -> T&&
+{
+  if (not constraint<T>::valid(value)) {
+    (void)constraint<T>{value};
+  }
+  return std::forward<T>(value);
+}
 
 /// A value always less than zero
 /// @tparam T underlying type
@@ -101,5 +120,14 @@ using strictly_bounded =
     constrained_value<T,
                       predicate::greater::bind_back<lo>,
                       predicate::less::bind_back<hi>>;
+
+/// A value contained by lower and upper bounds calculated from another value
+///     and an absolute tolerance
+/// @tparam T underlying type
+/// @tparam arg
+/// @tparam tol nonnegative absolute tolerance
+///
+template <algebra::additive_group T, auto arg, auto tol>
+using near = bounded<T, arg - ensure<nonnegative>(tol), arg + tol>;
 
 }  // namespace constrained_value

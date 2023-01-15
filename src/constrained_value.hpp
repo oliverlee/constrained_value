@@ -125,22 +125,27 @@ public:
 /// `constrained_value` type.
 ///
 /// @{
-template <bool, typename T, typename V, typename... Ps>
-struct constrained_value_ : std::type_identity<constrained_value<T, V, Ps...>>
-{};
+template <typename T, typename V, typename... Ps>
+auto set_violation_policy() -> constrained_value<T, V, Ps...>;
 
 template <typename T, typename P0, typename... Ps>
-struct constrained_value_<true, T, P0, Ps...>
-    : std::type_identity<
-          constrained_value<T, on_violation::print_and_abort, P0, Ps...>>
-{};
+  requires std::predicate<P0, T>
+auto set_violation_policy()
+    -> constrained_value<T, on_violation::print_and_abort, P0, Ps...>;
+/// @}
+
+/// Checks if a type is a specialization of `constrained_value`
+/// @{
+template <typename...>
+constexpr auto is_constrained_value_v = false;
+template <typename... Ts>
+constexpr auto is_constrained_value_v<constrained_value<Ts...>> = true;
 /// @}
 
 }  // namespace detail
 
 /// @copydoc detail::constrained_value
 template <typename T, typename V, typename... Ps>
-using constrained_value = typename detail::
-    constrained_value_<std::predicate<V, T>, T, V, Ps...>::type;
+using constrained_value = decltype(detail::set_violation_policy<T, V, Ps...>());
 
 }  // namespace constrained_value
