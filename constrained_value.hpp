@@ -2,7 +2,9 @@
 
 #include "src/algebra.hpp"
 #include "src/constrained_value.hpp"
+#include "src/functional.hpp"
 #include "src/predicate.hpp"
+#include "src/projection.hpp"
 
 #include <concepts>
 #include <utility>
@@ -129,5 +131,19 @@ using strictly_bounded =
 ///
 template <algebra::additive_group T, auto arg, auto tol>
 using near = bounded<T, arg - ensure<nonnegative>(tol), arg + tol>;
+
+/// A value with magnitude one
+/// @tparam T underlying type
+///
+/// Adds an invariant to a type where the magnitude of the value must always
+/// equal one. `T{1}` is treated as one.
+///
+/// `abs(t)` must be a valid expression and is used to determine the magnitude
+/// value `t` of type `T`.
+///
+template <typename T>  // equality comparble AND abs projectble
+using unit = constrained_value<
+    T,
+    functional::compose<projection::abs, predicate::equal_to::bind_back<1>>>;
 
 }  // namespace constrained_value

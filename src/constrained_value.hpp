@@ -3,6 +3,7 @@
 #include "src/assert_predicate.hpp"
 
 #include <concepts>
+#include <tuple>
 #include <type_traits>
 #include <utility>
 
@@ -50,6 +51,14 @@ public:
   /// Underlying type
   ///
   using underlying_type = T;
+
+  /// Violation policy
+  ///
+  using violation_policy_type = V;
+
+  /// Predicates
+  ///
+  using predicate_types = std::tuple<Ps...>;
 
   /// Determine if a value satisfies the invariants of `constrained_value`
   ///
