@@ -10,6 +10,19 @@ namespace constrained_value {
 ///
 namespace functional {
 
+/// Logical AND of multiple function objects
+template <std::default_initializable... Fs>
+struct all_of
+{
+  template <typename... Args>
+  constexpr auto operator()(Args&&... args) const
+      noexcept(noexcept(((Fs{}(std::forward<Args>(args)...)) and ...)))
+          -> decltype(((Fs{}(std::forward<Args>(args)...)) and ...))
+  {
+    return ((Fs{}(std::forward<Args>(args)...)) and ...);
+  }
+};
+
 /// Compose a set of function objects
 ///
 /// Invokes each function object with the return value of the one before.
@@ -75,7 +88,7 @@ struct nttp_bindable : F
     /// std::invoke(F{}, head..., tail...)
     /// ~~~
     ///
-    template <class... Head>
+    template <typename... Head>
     constexpr auto operator()(Head&&... head) const noexcept(
         noexcept(std::invoke(F{}, std::forward<Head>(head)..., tail...)))
         -> decltype(std::invoke(F{}, std::forward<Head>(head)..., tail...))

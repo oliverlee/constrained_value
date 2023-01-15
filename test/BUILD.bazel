@@ -61,21 +61,21 @@ cc_test(
 )
 
 cc_test(
-    name = "total_order_constrained_values_test",
+    name = "total_order_constrained_values",
     size = "small",
     srcs = ["total_order_constrained_values_test.cpp"],
     deps = [":utility"],
 )
 
 cc_test(
-    name = "near_constrained_value_test",
+    name = "near_constrained_value",
     size = "small",
     srcs = ["near_constrained_value_test.cpp"],
     deps = [":utility"],
 )
 
 cc_test(
-    name = "unit_constrained_value_test",
+    name = "unit_constrained_value",
     size = "small",
     srcs = ["unit_constrained_value_test.cpp"],
     deps = [":utility"],

@@ -15,33 +15,24 @@ namespace constrained_value {
 /// @param caller function verifying the type invariant
 /// @param source_location source location invoking caller
 ///
-template <typename V, typename T, std::predicate<T> P>
-  requires violation_policy<V, T, P, source_location>
+template <typename P, typename V, typename T>
+  requires(std::predicate<P, T> and violation_policy<V, T, P, source_location>)
 constexpr auto assert_predicate(
     const T& value,
-    const P& predicate,
     const char* caller,
-    const source_location& sl)                            //
-    noexcept(noexcept(std::invoke(predicate, value)) and  //
-             noexcept(std::invoke(V{}, value, predicate, caller, sl))) -> bool
+    const source_location& sl)                              //
+    noexcept(                                               //
+        noexcept(std::invoke(P{}, value)) and               //
+        noexcept(std::invoke(V{}, value, P{}, caller, sl))  //
+        )                                                   //
+    -> bool
 {
-  if (std::invoke(predicate, value)) {
+  if (std::invoke(P{}, value)) {
     return true;
   }
 
-  std::invoke(V{}, value, predicate, caller, sl);
+  std::invoke(V{}, value, P{}, caller, sl);
   return false;
-}
-
-template <typename V, typename... Ps, typename T>
-constexpr auto
-assert_predicates(const T& value,
-                  const char* caller = "",
-                  const source_location& sl = source_location::current())  //
-    noexcept(noexcept((assert_predicate<V>(value, Ps{}, caller, sl) and ...)))
-        -> bool
-{
-  return (assert_predicate<V>(value, Ps{}, caller, sl) and ...);
 }
 
 }  // namespace constrained_value

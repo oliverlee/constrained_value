@@ -36,8 +36,10 @@ struct invalid_value_error
 using unit_right_half_plane =
   cnv::constrained_value<
     std::complex<double>,
-    decltype([](auto&&...) { throw invalid_value_error{}; }),
-    decltype([](auto z) { return norm(z) == 1; }),
-    decltype([](auto z) { return real(z) > 0; })
+    cnv::functional::all_of<
+      decltype([](auto z) { return norm(z) == 1; }),
+      decltype([](auto z) { return real(z) > 0; })
+    >,
+    decltype([](auto&&...) { throw invalid_value_error{}; })
   >;
 ```
