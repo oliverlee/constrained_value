@@ -18,9 +18,9 @@ github_archive(
 
 github_archive(
     name = "bazel_clang_format",
-    commit = "cf230045617dc16ac550e3ba83521b1a7450d5fa",
+    commit = "cb6138c02da32a98f0a29fa5cc16151bf0d60807",
     repo = "oliverlee/bazel_clang_format",
-    sha256 = "4c687a2e04923af5fc9db6d3f8d2b9610288d08dc08d64d1a95d3da8019af0ed",
+    sha256 = "6204b17475b26d6cb736e309cae454da6765967e8a308bc35cb65fbe993eef2b",
 )
 
 github_archive(

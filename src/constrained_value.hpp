@@ -44,8 +44,8 @@ template <
     std::copyable T,
     std::predicate<T> P,
     violation_policy<T, P, source_location> V = on_violation::print_and_abort>
-  requires(std::same_as<T, std::remove_cvref_t<T>> and
-           std::default_initializable<P>)
+  requires (
+      std::same_as<T, std::remove_cvref_t<T>> and std::default_initializable<P>)
 class constrained_value
 {
   T value_;
@@ -80,8 +80,8 @@ public:
   ///     `value` to `T`
   ///
   template <std::same_as<T> U>
-  constexpr constrained_value(U value,
-                              source_location sl = source_location::current())
+  constexpr constrained_value(
+      U value, source_location sl = source_location::current())
       : value_{(assert_predicate<P, V>(value, __PRETTY_FUNCTION__, sl), value)}
   {}
 
@@ -110,8 +110,8 @@ public:
 
   /// Implicit conversion to the underlying type
   /// @{
-  [[nodiscard]] constexpr operator T() const
-      noexcept(std::is_nothrow_copy_constructible_v<T>)
+  [[nodiscard]] constexpr
+  operator T() const noexcept(std::is_nothrow_copy_constructible_v<T>)
   {
     return value_;
   }

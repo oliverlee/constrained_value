@@ -1,14 +1,14 @@
 #include "constrained_value/constrained_value.hpp"
 
 #include <boost/ut.hpp>
+
 #include <complex>
 
 namespace cnv = ::constrained_value;
 
 template <typename T>
-using right_half_plane =
-    cnv::constrained_value<T,
-                           decltype([](auto z) { return std::real(z) >= 0; })>;
+using right_half_plane = cnv::
+    constrained_value<T, decltype([](auto z) { return std::real(z) >= 0; })>;
 
 template <class T>
 constexpr auto norm(const T& z)

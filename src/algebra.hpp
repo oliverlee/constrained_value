@@ -32,8 +32,7 @@ concept associative =
 template <typename S, typename Op>
 concept magma =
   std::regular_invocable<Op, S, S> and
-  requires(S a, S b, Op op)
-  {
+  requires (S a, S b, Op op) {
     { std::invoke(op, a, b) } -> std::convertible_to<S>;
   };
 
@@ -63,8 +62,7 @@ concept additive_monoid =
 template <typename S>
 concept additive_group =
   additive_monoid<S> and
-  requires(S a)
-  {
+  requires (S a) {
     { -a } -> std::convertible_to<S>;
   };
 

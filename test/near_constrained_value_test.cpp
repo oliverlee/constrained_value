@@ -2,6 +2,7 @@
 #include "utility.hpp"
 
 #include <boost/ut.hpp>
+
 #include <cmath>
 
 // NOLINTBEGIN(readability-magic-numbers)

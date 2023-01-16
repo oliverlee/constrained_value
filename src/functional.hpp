@@ -15,9 +15,9 @@ template <std::default_initializable... Fs>
 struct all_of
 {
   template <typename... Args>
-  constexpr auto operator()(Args&&... args) const
-      noexcept(noexcept(((Fs{}(std::forward<Args>(args)...)) and ...)))
-          -> decltype(((Fs{}(std::forward<Args>(args)...)) and ...))
+  constexpr auto operator()(Args&&... args) const noexcept(
+      noexcept(((Fs{}(std::forward<Args>(args)...)) and ...)))
+      -> decltype(((Fs{}(std::forward<Args>(args)...)) and ...))
   {
     return ((Fs{}(std::forward<Args>(args)...)) and ...);
   }
@@ -39,24 +39,22 @@ template <std::default_initializable F, std::default_initializable G>
 struct compose<F, G>
 {
   template <typename T>
-  constexpr auto operator()(T&& value) const
-      noexcept(noexcept(G{}(F{}(std::forward<T>(value)))))
-          -> decltype(G{}(F{}(std::forward<T>(value))))
+  constexpr auto operator()(T&& value) const noexcept(noexcept(G{}(F{}(
+      std::forward<T>(value))))) -> decltype(G{}(F{}(std::forward<T>(value))))
   {
     return G{}(F{}(std::forward<T>(value)));
   }
 };
 
 template <std::default_initializable F, std::default_initializable... Gs>
-  requires(sizeof...(Gs) != 0)
+  requires (sizeof...(Gs) != 0)
 struct compose<F, Gs...>
 {
   using G = compose<Gs...>;
 
   template <typename T>
-  constexpr auto operator()(T&& value) const
-      noexcept(noexcept(G{}(F{}(std::forward<T>(value)))))
-          -> decltype(G{}(F{}(std::forward<T>(value))))
+  constexpr auto operator()(T&& value) const noexcept(noexcept(G{}(F{}(
+      std::forward<T>(value))))) -> decltype(G{}(F{}(std::forward<T>(value))))
   {
     return G{}(F{}(std::forward<T>(value)));
   }

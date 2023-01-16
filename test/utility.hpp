@@ -15,9 +15,11 @@ inline constexpr auto throw_policy = [](auto&&...) { throw invariant_error{}; };
 /// Test that a constrained_value is constructible at compile time without an
 /// invariant violation
 ///
-template <template <typename, auto...> typename constraint,
-          auto... args,
-          typename T>
+template <
+    template <typename, auto...>
+    typename constraint,
+    auto... args,
+    typename T>
 consteval auto constexpr_valid(T value)
 {
   (void)constraint<T, args...>{value};
@@ -26,9 +28,11 @@ consteval auto constexpr_valid(T value)
 /// Test that a constrained_value is constructible without an invariant
 /// violation
 ///
-template <template <typename, auto...> typename constraint,
-          auto... args,
-          typename T>
+template <
+    template <typename, auto...>
+    typename constraint,
+    auto... args,
+    typename T>
 auto valid(T value)
 {
   using ::boost::ut::expect;
@@ -40,9 +44,11 @@ auto valid(T value)
 /// Test that the construction of a constrained_value fail due to an invariant
 /// violation
 ///
-template <template <typename, auto...> typename constraint,
-          auto... args,
-          typename T>
+template <
+    template <typename, auto...>
+    typename constraint,
+    auto... args,
+    typename T>
 auto invalid(T value)
 {
   using ::boost::ut::aborts;

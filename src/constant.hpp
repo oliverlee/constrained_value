@@ -28,8 +28,8 @@ struct Zero
   /// @requires `T{}` must be the zero value
   ///
   template <std::default_initializable T>
-  [[nodiscard]] constexpr operator T() const
-      noexcept(std::is_nothrow_default_constructible_v<T>)
+  [[nodiscard]] constexpr
+  operator T() const noexcept(std::is_nothrow_default_constructible_v<T>)
   {
     return T{};
   }
@@ -37,8 +37,8 @@ struct Zero
   /// Defaulted comparisons
   /// @{
   [[nodiscard]] friend auto operator<=>(const Zero&, const Zero&) = default;
-  [[nodiscard]] friend auto operator==(const Zero&, const Zero&)
-      -> bool = default;
+  [[nodiscard]] friend auto
+  operator==(const Zero&, const Zero&) -> bool = default;
   /// @}
 
   // NOTE: explicit return types result in recursive template instantiation and
@@ -49,7 +49,7 @@ struct Zero
   /// Comparisons against arbitrary types
   /// @{
   template <std::default_initializable T>
-    requires(not std::same_as<T, Zero> and std::equality_comparable<T>)
+    requires (not std::same_as<T, Zero> and std::equality_comparable<T>)
   [[nodiscard]] friend constexpr auto
   operator<=>(const T& x, const Zero&) noexcept(noexcept(x <=> T{}))
   {
@@ -57,7 +57,7 @@ struct Zero
   }
 
   template <std::default_initializable T>
-    requires(not std::same_as<T, Zero> and std::three_way_comparable<T>)
+    requires (not std::same_as<T, Zero> and std::three_way_comparable<T>)
   [[nodiscard]] friend constexpr auto
   operator==(const T& x, const Zero&) noexcept(noexcept(x == T{}))
   {
@@ -69,7 +69,7 @@ struct Zero
 /// Wrapper for not yet supported non-type template arguments (e.g. double with
 /// Clang)
 template <typename T>
-  requires(requires(T value) { std::bit_cast<T>(value); })
+  requires (requires (T value) { std::bit_cast<T>(value); })
 struct bitwise
 {
   std::array<std::byte, sizeof(T)> data;
@@ -104,54 +104,48 @@ struct bitwise
 
   template <std::same_as<T> U>
   [[nodiscard]] friend consteval auto
-  operator+(const bitwise<U>& x,
-            const bitwise<U>& y) noexcept(noexcept(x.value() + y.value()))
-      -> decltype(bitwise<U>{x.value() + y.value()})
+  operator+(const bitwise<U>& x, const bitwise<U>& y) noexcept(noexcept(
+      x.value() + y.value())) -> decltype(bitwise<U>{x.value() + y.value()})
   {
     return bitwise<U>{x.value() + y.value()};
   }
 
   template <std::same_as<T> U>
   [[nodiscard]] friend consteval auto
-  operator-(const bitwise<U>& x,
-            const bitwise<U>& y) noexcept(noexcept(x.value() - y.value()))
-      -> decltype(bitwise<U>{x.value() - y.value()})
+  operator-(const bitwise<U>& x, const bitwise<U>& y) noexcept(noexcept(
+      x.value() - y.value())) -> decltype(bitwise<U>{x.value() - y.value()})
   {
     return bitwise<U>{x.value() - y.value()};
   }
 
   template <std::same_as<T> U>
   [[nodiscard]] friend consteval auto
-  operator*(const bitwise<U>& x,
-            const bitwise<U>& y) noexcept(noexcept(x.value() * y.value()))
-      -> decltype(bitwise<U>{x.value() * y.value()})
+  operator*(const bitwise<U>& x, const bitwise<U>& y) noexcept(noexcept(
+      x.value() * y.value())) -> decltype(bitwise<U>{x.value() * y.value()})
   {
     return bitwise<U>{x.value() * y.value()};
   }
 
   template <std::same_as<T> U>
   [[nodiscard]] friend consteval auto
-  operator/(const bitwise<U>& x,
-            const bitwise<U>& y) noexcept(noexcept(x.value() / y.value()))
-      -> decltype(bitwise<U>{x.value() / y.value()})
+  operator/(const bitwise<U>& x, const bitwise<U>& y) noexcept(noexcept(
+      x.value() / y.value())) -> decltype(bitwise<U>{x.value() / y.value()})
   {
     return bitwise<U>{x.value() / y.value()};
   }
 
   template <std::same_as<T> U>
   [[nodiscard]] friend constexpr auto
-  operator<=>(const bitwise<U>& x,
-              const bitwise<U>& y) noexcept(noexcept(x.value() <=> y.value()))
-      -> decltype(x.value() <=> y.value())
+  operator<=>(const bitwise<U>& x, const bitwise<U>& y) noexcept(
+      noexcept(x.value() <=> y.value())) -> decltype(x.value() <=> y.value())
   {
     return x.value() <=> y.value();
   }
 
   template <std::same_as<T> U>
   [[nodiscard]] friend constexpr auto
-  operator==(const bitwise<U>& x,
-             const bitwise<U>& y) noexcept(noexcept(x.value() == y.value()))
-      -> decltype(x.value() == y.value())
+  operator==(const bitwise<U>& x, const bitwise<U>& y) noexcept(
+      noexcept(x.value() == y.value())) -> decltype(x.value() == y.value())
   {
     return x.value() == y.value();
   }

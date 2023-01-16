@@ -1,6 +1,7 @@
 #include "constrained_value/constrained_value.hpp"
 
 #include <boost/ut.hpp>
+
 #include <tuple>
 
 namespace cnv = ::constrained_value;

@@ -19,11 +19,12 @@ namespace constrained_value {
 template <typename V, typename T, typename P, typename S>
 concept violation_policy =
     std::default_initializable<V> and
-    std::regular_invocable<const V,
-                           const T&,
-                           const P&,
-                           const char*,
-                           const S&> and
+    std::regular_invocable<
+        const V,
+        const T&,
+        const P&,
+        const char*,
+        const S&> and
     std::is_void_v<
         std::invoke_result_t<V, const T&, const P&, const char*, const S&>>;
 
@@ -35,15 +36,15 @@ struct on_violation
   struct print_and_abort
   {
     template <typename T, typename P, typename SourceLocation>
-    auto operator()(const T& value,
-                    const P&,
-                    const char* caller,
-                    const SourceLocation& sl) const -> void
+    auto operator()(
+        const T& value, const P&, const char* caller, const SourceLocation& sl)
+        const -> void
     {
-      std::cerr << "file: " << sl.file_name() << "(" << sl.line() << ":"
-                << sl.column() << ") `" << sl.function_name() << "`: "
-                << "contract violated in `" << caller << "`. "
-                << detail::type_name<P>() << "(" << value << ") is false.\n";
+      std::cerr
+          << "file: " << sl.file_name() << "(" << sl.line() << ":"
+          << sl.column() << ") `" << sl.function_name() << "`: "
+          << "contract violated in `" << caller << "`. "
+          << detail::type_name<P>() << "(" << value << ") is false.\n";
 
       std::abort();
     }
