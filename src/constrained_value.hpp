@@ -1,6 +1,7 @@
 #pragma once
 
 #include "src/assert_predicate.hpp"
+#include "src/ulp_distance.hpp"
 #include "src/violation_policy.hpp"
 
 #include <concepts>
