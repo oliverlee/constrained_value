@@ -80,3 +80,13 @@ cc_test(
     srcs = ["unit_constrained_value_test.cpp"],
     deps = [":utility"],
 )
+
+cc_test(
+    name = "ulp",
+    size = "small",
+    srcs = ["ulp_test.cpp"],
+    deps = [
+        "//:constrained_value",
+        "@boost_ut",
+    ],
+)

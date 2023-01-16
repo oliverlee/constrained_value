@@ -50,6 +50,7 @@ cc_library(
         "src/predicate.hpp",
         "src/projection.hpp",
         "src/source_location.hpp",
+        "src/ulp.hpp",
         "src/violation_policy.hpp",
     ],
     hdrs = ["constrained_value.hpp"],
