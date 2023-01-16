@@ -1,11 +1,16 @@
 #pragma once
 
+#include "src/bitwise_integer.hpp"
+#include "src/math.hpp"
+#include "src/ulp_distance.hpp"
+
 #include <array>
 #include <bit>
 #include <cassert>
 #include <compare>
 #include <concepts>
 #include <cstddef>
+#include <limits>
 #include <type_traits>
 
 // NOLINTNEXTLINE(modernize-concat-nested-namespaces)
@@ -66,6 +71,87 @@ struct Zero
   /// @}
 };
 
+/// ULP offset constant
+///
+/// Used to add or subtract ULP from a floating point value.
+///
+template <int N>
+  requires (N != std::numeric_limits<int>::min())
+struct ulp_offset
+{
+  static constexpr auto value = N;
+
+  template <int M = N>
+    requires (M == N)
+  [[nodiscard]] friend consteval auto
+  operator+(ulp_offset<M>) noexcept -> ulp_offset<M>
+  {
+    return {};
+  }
+
+  template <int M = N>
+    requires (M == N)
+  [[nodiscard]] friend consteval auto
+  operator-(ulp_offset<M>) noexcept -> ulp_offset<-M>
+  {
+    return {};
+  }
+
+  template <
+      math::iec559_floating_point T,
+      typename L = std::numeric_limits<T>,
+      auto offset = bitwise_integer_for_t<T>{N}>
+  [[nodiscard]] friend consteval auto
+  operator+(const T& x, ulp_offset) noexcept  // NOLINT(misc-no-recursion)
+      -> T
+  {
+    if (math::signbit(x)) {
+      // This can only recurse once and can only be invoked at compile time
+      // NOLINTNEXTLINE(misc-no-recursion)
+      return -(-x + -ulp_offset{});
+    }
+
+    assert(not math::signbit(x));
+    assert(math::isfinite(x));
+
+    if (const auto dist_to_zero = ulp_distance(x, T{}); offset < dist_to_zero) {
+      const auto offset_past_zero = offset - dist_to_zero;
+      const auto lowest_finite = bitwise_integer_reinterpretation(L::lowest());
+      const auto minus_zero = bitwise_integer_reinterpretation(-T{});
+
+      // -T{} reinterpreted as I is smaller than lowest_finite due to IEEE
+      // representation
+      assert(minus_zero < lowest_finite);
+
+      // ensure result is finite:
+      //   minus_zero - offset_past_zero <= lowest_finite
+      assert(minus_zero - lowest_finite <= offset_past_zero);
+
+      return std::bit_cast<T>(minus_zero - offset_past_zero);
+    }
+
+    const auto largest_finite = bitwise_integer_reinterpretation(L::max());
+
+    // ensure result is finite:
+    //   std::bit_cast<I>(x) + offset <= largest_finite
+    assert(offset <= (largest_finite - bitwise_integer_reinterpretation(x)));
+
+    return std::bit_cast<T>(bitwise_integer_reinterpretation(x) + offset);
+  }
+
+  template <typename T>
+  [[nodiscard]] friend consteval auto
+  operator-(const T& x, ulp_offset y) noexcept -> decltype(x + y)
+  {
+    return x + (-y);
+  }
+};
+
+/// Variable template for an ULP offset
+///
+template <int N>
+inline constexpr auto ulp = ulp_offset<N>{};
+
 /// Wrapper for not yet supported non-type template arguments (e.g. double with
 /// Clang)
 template <typename T>
@@ -93,6 +179,13 @@ struct bitwise
   [[nodiscard]] constexpr auto value() const noexcept -> T
   {
     return static_cast<T>(*this);
+  }
+
+  template <std::same_as<T> U>
+  [[nodiscard]] friend consteval auto
+  operator+(const bitwise<U>& x) noexcept(noexcept(+x.value())) -> bitwise<U>
+  {
+    return bitwise<U>{+x.value()};
   }
 
   template <std::same_as<T> U>

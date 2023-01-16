@@ -100,3 +100,13 @@ cc_test(
         "@boost_ut",
     ],
 )
+
+cc_test(
+    name = "constant_ulp",
+    size = "small",
+    srcs = ["constant_ulp_test.cpp"],
+    deps = [
+        "//:constrained_value",
+        "@boost_ut",
+    ],
+)
