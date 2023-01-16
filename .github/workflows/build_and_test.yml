@@ -40,14 +40,11 @@ jobs:
         toolchain: [gcc11, llvm15]
         feature: ['']
         include:
-          - os: ubuntu-latest
-            toolchain: llvm15
+          - toolchain: llvm15
             feature: asan
-          - os: ubuntu-latest
-            toolchain: llvm15
+          - toolchain: llvm15
             feature: tsan
-          - os: ubuntu-latest
-            toolchain: llvm15
+          - toolchain: llvm15
             feature: ubsan
 
     runs-on: ubuntu-latest
