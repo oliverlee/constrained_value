@@ -55,7 +55,28 @@ CXXFLAGS = [
     "-Wextra",
     "-Wpedantic",
     "-Wconversion",
+    "-Wshadow",
+    "-Wnon-virtual-dtor",
+    "-Wold-style-cast",
+    "-Wcast-align",
+    "-Wunused",
+    "-Woverloaded-virtual",
+    "-Wmisleading-indentation",
+    "-Wnull-dereference",
+    "-Wdouble-promotion",
+    "-Wformat=2",
+    "-Wimplicit-fallthrough",
+    "-Wpadded",
 ]
+
+GCC_CXXFLAGS = CXXFLAGS + [
+    "-Wduplicated-cond",
+    "-Wduplicated-branches",
+    "-Wlogical-op",
+    "-Wuseless-cast",
+]
+
+LLVM_CXXFLAGS = CXXFLAGS
 
 load("@bazel_toolchain//toolchain:deps.bzl", "bazel_toolchain_dependencies")
 load("@bazel_toolchain//toolchain:rules.bzl", "llvm_toolchain")
@@ -64,7 +85,7 @@ bazel_toolchain_dependencies()
 
 llvm_toolchain(
     name = "llvm_toolchain",
-    cxx_flags = {"": ["-stdlib=libc++"] + CXXFLAGS},
+    cxx_flags = {"": ["-stdlib=libc++"] + LLVM_CXXFLAGS},
     llvm_version = "15.0.6",
 )
 
@@ -78,7 +99,7 @@ bootlin_toolchain(
     name = "gcc_x86-64_2022.08-1",
     architecture = "x86-64",
     buildroot_version = "2022.08-1",
-    extra_cxxflags = CXXFLAGS,
+    extra_cxxflags = GCC_CXXFLAGS,
 )
 
 register_toolchains(
