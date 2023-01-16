@@ -21,11 +21,11 @@ class source_location
 
 public:
   // NOLINTBEGIN(bugprone-easily-swappable-parameters)
-  [[nodiscard]] static constexpr auto
-  current(unsigned line = __builtin_LINE(),
-          unsigned column = __builtin_COLUMN(),
-          const char* file = __builtin_FILE(),
-          const char* function = __builtin_FUNCTION()) noexcept
+  [[nodiscard]] static constexpr auto current(
+      unsigned line = __builtin_LINE(),
+      unsigned column = __builtin_COLUMN(),
+      const char* file = __builtin_FILE(),
+      const char* function = __builtin_FUNCTION()) noexcept
   // NOLINTEND(bugprone-easily-swappable-parameters)
   {
     auto sl = source_location{};

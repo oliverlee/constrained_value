@@ -16,7 +16,7 @@ namespace constrained_value {
 /// @param source_location source location invoking caller
 ///
 template <typename P, typename V, typename T>
-  requires(std::predicate<P, T> and violation_policy<V, T, P, source_location>)
+  requires (std::predicate<P, T> and violation_policy<V, T, P, source_location>)
 constexpr auto assert_predicate(
     const T& value,
     const char* caller,

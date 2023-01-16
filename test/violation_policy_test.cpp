@@ -23,7 +23,8 @@ auto main() -> int
   };
 
   test("throws when constructing with an invalid value") = [] {
-    expect(
-        throws<nonpositive_value_error>([] { (void)(positive_double{0.0}); }));
+    expect(throws<nonpositive_value_error>([] {
+      (void)(positive_double{0.0});
+    }));
   };
 }
