@@ -82,9 +82,19 @@ cc_test(
 )
 
 cc_test(
-    name = "ulp",
+    name = "ulp_distance",
     size = "small",
-    srcs = ["ulp_test.cpp"],
+    srcs = ["ulp_distance_test.cpp"],
+    deps = [
+        "//:constrained_value",
+        "@boost_ut",
+    ],
+)
+
+cc_test(
+    name = "math",
+    size = "small",
+    srcs = ["math_test.cpp"],
     deps = [
         "//:constrained_value",
         "@boost_ut",
