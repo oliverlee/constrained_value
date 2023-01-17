@@ -32,6 +32,7 @@ jobs:
           build \
           --extra_toolchains=${{ matrix.toolchain }} \
           --config=${{ matrix.config}} \
+          --keep_going \
           //...
   test:
     strategy:
