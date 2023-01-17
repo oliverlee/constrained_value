@@ -19,6 +19,10 @@ namespace constrained_value {
 ///
 namespace constant {
 
+// TODO replace `Zero` with identity<S, std::ranges::plus>
+// and add identity<S, std::ranges::multiplies>
+// along with customization points for user-defined types
+
 /// Convertible zero constant
 ///
 struct Zero
