@@ -29,7 +29,8 @@ auto main() -> int
       unsigned long long,
       float,
       double,
-      long double>{};
+      long double,
+      cnv::constant::bitwise<double>>{};
 
   test("types implement numeric_limits") = []<typename T>() {
     static_assert(cnv::math::numeric_limits<T>);
@@ -49,4 +50,13 @@ auto main() -> int
   test("types do not model numeric") = []<typename T>() {
     static_assert(not cnv::math::numeric<T>);
   } | non_numeric_types;
+
+  test("constant::bitwise<T> doesn't specialize numeric limits if T doesn't ") =
+      [] {
+        static_assert(
+            not std::numeric_limits<std::complex<double>>::is_specialized);
+        static_assert(
+            not std::numeric_limits<
+                cnv::constant::bitwise<std::complex<double>>>::is_specialized);
+      };
 }

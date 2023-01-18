@@ -50,6 +50,7 @@ cc_library(
         "src/detail/type_name.hpp",
         "src/functional.hpp",
         "src/math.hpp",
+        "src/math/numeric.hpp",
         "src/predicate.hpp",
         "src/projection.hpp",
         "src/source_location.hpp",
