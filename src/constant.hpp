@@ -1,6 +1,7 @@
 #pragma once
 
 #include "src/bitwise_integer.hpp"
+#include "src/compare.hpp"
 #include "src/math.hpp"
 #include "src/ulp_distance.hpp"
 
@@ -10,6 +11,7 @@
 #include <compare>
 #include <concepts>
 #include <cstddef>
+#include <functional>
 #include <limits>
 #include <type_traits>
 
@@ -56,15 +58,16 @@ struct Zero
   template <std::default_initializable T>
     requires (not std::same_as<T, Zero> and std::equality_comparable<T>)
   [[nodiscard]] friend constexpr auto
-  operator<=>(const T& x, const Zero&) noexcept(noexcept(x <=> T{}))
+  operator<=>(const T& x, const Zero&) noexcept(
+      is_nothrow_partial_order_comparable_v<T>)
   {
     return x <=> T{};
   }
 
   template <std::default_initializable T>
     requires (not std::same_as<T, Zero> and std::three_way_comparable<T>)
-  [[nodiscard]] friend constexpr auto
-  operator==(const T& x, const Zero&) noexcept(noexcept(x == T{}))
+  [[nodiscard]] friend constexpr auto operator==(
+      const T& x, const Zero&) noexcept(is_nothrow_equality_comparable_v<T>)
   {
     return x == T{};
   }
@@ -167,9 +170,7 @@ struct bitwise
 
   consteval explicit bitwise(const T& value) noexcept
       : bitwise(std::bit_cast<bitwise>(value))
-  {
-    assert(value == value);
-  }
+  {}
 
   [[nodiscard]] constexpr operator T() const noexcept
   {
@@ -183,46 +184,52 @@ struct bitwise
 
   template <std::same_as<T> U>
   [[nodiscard]] friend consteval auto
-  operator+(const bitwise<U>& x) noexcept(noexcept(+x.value())) -> bitwise<U>
+  operator+(const bitwise<U>& x) noexcept(noexcept(+x.value()))
+      -> decltype(bitwise<U>{+x.value()})
   {
     return bitwise<U>{+x.value()};
   }
 
   template <std::same_as<T> U>
-  [[nodiscard]] friend consteval auto
-  operator-(const bitwise<U>& x) noexcept(noexcept(-x.value())) -> bitwise<U>
+  [[nodiscard]] friend consteval auto operator-(const bitwise<U>& x) noexcept(
+      std::is_nothrow_invocable_v<std::negate<>, U>)
+      -> decltype(bitwise<U>{-x.value()})
   {
     return bitwise<U>{-x.value()};
   }
 
   template <std::same_as<T> U>
   [[nodiscard]] friend consteval auto
-  operator+(const bitwise<U>& x, const bitwise<U>& y) noexcept(noexcept(
-      x.value() + y.value())) -> decltype(bitwise<U>{x.value() + y.value()})
+  operator+(const bitwise<U>& x, const bitwise<U>& y) noexcept(
+      std::is_nothrow_invocable_v<std::plus<>, U, U>)
+      -> decltype(bitwise<U>{x.value() + y.value()})
   {
     return bitwise<U>{x.value() + y.value()};
   }
 
   template <std::same_as<T> U>
   [[nodiscard]] friend consteval auto
-  operator-(const bitwise<U>& x, const bitwise<U>& y) noexcept(noexcept(
-      x.value() - y.value())) -> decltype(bitwise<U>{x.value() - y.value()})
+  operator-(const bitwise<U>& x, const bitwise<U>& y) noexcept(
+      std::is_nothrow_invocable_v<std::minus<>, U, U>)
+      -> decltype(bitwise<U>{x.value() - y.value()})
   {
     return bitwise<U>{x.value() - y.value()};
   }
 
   template <std::same_as<T> U>
   [[nodiscard]] friend consteval auto
-  operator*(const bitwise<U>& x, const bitwise<U>& y) noexcept(noexcept(
-      x.value() * y.value())) -> decltype(bitwise<U>{x.value() * y.value()})
+  operator*(const bitwise<U>& x, const bitwise<U>& y) noexcept(
+      std::is_nothrow_invocable_v<std::multiplies<>, U, U>)
+      -> decltype(bitwise<U>{x.value() * y.value()})
   {
     return bitwise<U>{x.value() * y.value()};
   }
 
   template <std::same_as<T> U>
   [[nodiscard]] friend consteval auto
-  operator/(const bitwise<U>& x, const bitwise<U>& y) noexcept(noexcept(
-      x.value() / y.value())) -> decltype(bitwise<U>{x.value() / y.value()})
+  operator/(const bitwise<U>& x, const bitwise<U>& y) noexcept(
+      std::is_nothrow_invocable_v<std::divides<>, U, U>)
+      -> decltype(bitwise<U>{x.value() / y.value()})
   {
     return bitwise<U>{x.value() / y.value()};
   }
@@ -230,7 +237,8 @@ struct bitwise
   template <std::same_as<T> U>
   [[nodiscard]] friend constexpr auto
   operator<=>(const bitwise<U>& x, const bitwise<U>& y) noexcept(
-      noexcept(x.value() <=> y.value())) -> decltype(x.value() <=> y.value())
+      is_nothrow_partial_order_comparable_v<U>)
+      -> decltype(x.value() <=> y.value())
   {
     return x.value() <=> y.value();
   }
@@ -238,7 +246,7 @@ struct bitwise
   template <std::same_as<T> U>
   [[nodiscard]] friend constexpr auto
   operator==(const bitwise<U>& x, const bitwise<U>& y) noexcept(
-      noexcept(x.value() == y.value())) -> decltype(x.value() == y.value())
+      is_nothrow_equality_comparable_v<U>) -> decltype(x.value() == y.value())
   {
     return x.value() == y.value();
   }
@@ -256,3 +264,13 @@ static constexpr struct
 
 }  // namespace constant
 }  // namespace constrained_value
+
+/// Specialize `std::numeric_limits<bitwise<T>>` if `std::numeric_limits<T>` is
+/// specialized
+///
+template <::constrained_value::math::numeric_limits T>
+struct std::numeric_limits<::constrained_value::constant::bitwise<T>>
+    : ::constrained_value::math::derive_numeric_limits_from_t<
+          ::constrained_value::constant::bitwise<T>,
+          T>
+{};

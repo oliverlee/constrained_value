@@ -92,9 +92,9 @@ cc_test(
 )
 
 cc_test(
-    name = "math",
+    name = "numeric",
     size = "small",
-    srcs = ["math_test.cpp"],
+    srcs = ["numeric_test.cpp"],
     deps = [
         "//:constrained_value",
         "@boost_ut",
