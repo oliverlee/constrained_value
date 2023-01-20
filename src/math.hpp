@@ -5,6 +5,8 @@
 #include "src/compare.hpp"
 #include "src/math/numeric.hpp"
 
+#include <cassert>
+#include <compare>
 #include <concepts>
 #include <functional>
 #include <type_traits>
@@ -75,7 +77,7 @@ inline constexpr struct
   }
 } isfinite{};
 
-/// Determines if a number is negative
+/// Determines if the IEC 559 bit representation of a number has a negative sign
 /// @see https://en.cppreference.com/w/cpp/numeric/math/signbit
 ///
 inline constexpr struct
@@ -87,20 +89,22 @@ inline constexpr struct
   }
 } signbit{};
 
-/// Returns the sign of a number as an integer
+/// Returns the ordering of two numbers as an integer
+/// @pre x and y have comparable values
 /// @see https://en.cppreference.com/w/cpp/numeric/math/signbit
 ///
 namespace detail {
 template <std::signed_integral I>
 struct signum_fn
 {
-  // TODO use partial_ordering
-  // https://stackoverflow.com/questions/61604694/check-if-a-type-is-a-partial-order
-  template <std::totally_ordered T>
-  [[nodiscard]] constexpr auto operator()(const T& x, const T& y) const
-      noexcept(is_nothrow_partial_order_comparable_v<T>) -> I
+  template <std::three_way_comparable T>
+  [[nodiscard]] constexpr auto operator()(const T& x, const T& y) const -> I
   {
-    return static_cast<I>(y < x) - static_cast<I>(x < y);
+    const auto v = x <=> y;
+    assert(v != std::partial_ordering::unordered);
+    // https://github.com/llvm/llvm-project/issues/53961
+    // NOLINTNEXTLINE(modernize-use-nullptr)
+    return (v < 0) ? -I{1} : (v > 0) ? I{1} : I{};
   }
 };
 }  // namespace detail

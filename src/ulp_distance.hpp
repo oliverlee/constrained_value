@@ -5,6 +5,7 @@
 #include "src/math.hpp"
 
 #include <cassert>
+#include <type_traits>
 
 namespace constrained_value {
 
