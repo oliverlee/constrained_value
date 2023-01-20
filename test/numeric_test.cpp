@@ -51,7 +51,7 @@ auto main() -> int
     static_assert(not cnv::math::numeric<T>);
   } | non_numeric_types;
 
-  test("constant::bitwise<T> doesn't specialize numeric limits if T doesn't ") =
+  test("constant::bitwise<T> doesn't specialize numeric limits if T doesn't") =
       [] {
         static_assert(
             not std::numeric_limits<std::complex<double>>::is_specialized);
