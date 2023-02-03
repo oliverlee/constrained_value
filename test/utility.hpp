@@ -1,6 +1,7 @@
 #pragma once
 
 #include <boost/ut.hpp>
+#include <type_traits>
 
 namespace constrained_value::test {
 
@@ -38,7 +39,13 @@ auto valid(T value)
   using ::boost::ut::expect;
   using ::boost::ut::nothrow;
 
-  return expect(nothrow([&] { constraint<T, args..., throw_policy>{value}; }));
+  using C = constrained_value<
+    T,
+    typename constraint<T, args...>::predicate_type,
+    std::remove_cvref_t<decltype(throw_policy)>
+    >;
+
+  return expect(nothrow([&] { C{value}; }));
 }
 
 /// Test that the construction of a constrained_value fail due to an invariant
