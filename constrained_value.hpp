@@ -187,8 +187,11 @@ using near = constrained_value<
         predicate::less_equal::bind_back<arg + tol>>,
     decltype(violation_policy)>;
 
+  //static_assert(constant::bitwise{double{}} == constant::Zero{});
+
 /// A value with magnitude one
 /// @tparam T underlying type
+/// @tparam tol nonnegative absolute tolerance
 ///
 /// Adds an invariant to a type where the magnitude of the value must always
 /// equal one. `T{1}` is treated as one.
@@ -196,10 +199,21 @@ using near = constrained_value<
 /// `abs(t)` must be a valid expression and is used to determine the magnitude
 /// value `t` of type `T`.
 ///
-template <typename T, auto violation_policy = on_violation::print_and_abort{}>
+template <
+  typename T,
+  auto tol = decltype(constant::bitwise{projection::abs{}(std::declval<T>())}){},
+  auto violation_policy = on_violation::print_and_abort{}>
 using unit = constrained_value<
     T,
-    functional::compose<projection::abs, predicate::equal_to::bind_back<1>>,
+    functional::compose<
+      projection::abs,
+      functional::all_of<
+        predicate::greater_equal::bind_back<
+  constant::bitwise{decltype(projection::abs{}(std::declval<T>())){1}} - tol>,
+        predicate::less_equal::bind_back<
+  constant::bitwise{decltype(projection::abs{}(std::declval<T>())){1}} + tol>
+      >
+    >,
     decltype(violation_policy)>;
 
 }  // namespace constrained_value
